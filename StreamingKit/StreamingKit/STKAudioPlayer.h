@@ -138,6 +138,9 @@ typedef void(^STKFrameFilter)(UInt32 channelsPerFrame, UInt32 bytesPerFrame, UIn
 /// Raised when datasource read stream metadata
 -(void) audioPlayer:(STKAudioPlayer*)audioPlayer didReadStreamMetadata:(NSDictionary*)dictionary;
 
+/// Raised when buffering progress has changed (after seeking or slower connections)
+-(void) audioPlayer:(STKAudioPlayer*)audioPlayer didUpdateBufferingProgress:(double)bufferingProgress;
+
 @end
 
 @interface STKAudioPlayer : NSObject<STKDataSourceDelegate>
@@ -151,6 +154,8 @@ typedef void(^STKFrameFilter)(UInt32 channelsPerFrame, UInt32 bytesPerFrame, UIn
 @property (readonly) double duration;
 /// Gets the current item progress in seconds
 @property (readonly) double progress;
+/// Gets the current buffer progress (ranges 0 - 1)
+@property (readonly) double bufferingProgress;
 /// Gets or sets the playback rate (default is 1.0)
 @property(readwrite) float rate;
 // Gets or sets the playback overlap (default is 8.0)

@@ -302,6 +302,7 @@ static AudioStreamBasicDescription recordAudioStreamBasicDescription;
     volatile BOOL disposeWasRequested;
     volatile BOOL seekToTimeWasRequested;
     volatile STKAudioPlayerStopReason stopReason;
+    volatile double bufferingProgress;
 }
 
 @property (readwrite) STKAudioPlayerInternalState internalState;
@@ -2912,6 +2913,7 @@ static OSStatus OutputRenderCallback(void* inRefCon, AudioUnitRenderActionFlags*
     UInt32 end = (audioPlayer->pcmBufferFrameStartIndex + audioPlayer->pcmBufferUsedFrameCount) % audioPlayer->pcmBufferTotalFrameCount;
     BOOL signal = audioPlayer->waiting && used < audioPlayer->pcmBufferTotalFrameCount / 2;
 	NSArray* frameFilters = audioPlayer->frameFilters;
+    double bufferingProgress = 0;
     
 	if (entry)
 	{
@@ -2927,6 +2929,9 @@ static OSStatus OutputRenderCallback(void* inRefCon, AudioUnitRenderActionFlags*
 			if (entry && currentlyReadingEntry == entry
 				&& entry->framesQueued < framesRequiredToStartPlaying)
 			{
+                if (framesRequiredToStartPlaying > 0) {
+                    bufferingProgress = MIN(1, (double)entry->framesQueued / (double)framesRequiredToStartPlaying);
+                }
 				waitForBuffer = YES;
 			}
 		}
@@ -2941,6 +2946,9 @@ static OSStatus OutputRenderCallback(void* inRefCon, AudioUnitRenderActionFlags*
 			
 			if (used < framesRequiredToStartPlaying)
 			{
+                if (framesRequiredToStartPlaying > 0) {
+                    bufferingProgress = MIN(1, (double)used / (double)framesRequiredToStartPlaying);
+                }
 				waitForBuffer = YES;
 			}
 		}
@@ -2955,6 +2963,9 @@ static OSStatus OutputRenderCallback(void* inRefCon, AudioUnitRenderActionFlags*
 			
 			if (used < framesRequiredToStartPlaying)
 			{
+                if (framesRequiredToStartPlaying > 0) {
+                    bufferingProgress = MIN(1, (double)used / (double)framesRequiredToStartPlaying);
+                }
 				waitForBuffer = YES;
 			}
 		}
@@ -3057,7 +3068,7 @@ static OSStatus OutputRenderCallback(void* inRefCon, AudioUnitRenderActionFlags*
         if (!(entry == nil || state == STKAudioPlayerInternalStateWaitingForDataAfterSeek || state == STKAudioPlayerInternalStateWaitingForData || state == STKAudioPlayerInternalStateRebuffering))
         {
             // Buffering
-            
+            bufferingProgress = 0;
             [audioPlayer setInternalState:STKAudioPlayerInternalStateRebuffering ifInState:^BOOL(STKAudioPlayerInternalState state)
             {
                  return (state & STKAudioPlayerInternalStateRunning) && state != STKAudioPlayerInternalStatePaused;
@@ -3071,6 +3082,7 @@ static OSStatus OutputRenderCallback(void* inRefCon, AudioUnitRenderActionFlags*
 				
 				if (audioPlayer->waitingForDataAfterSeekFrameCount > audioPlayer->framesRequiredBeforeWaitingForDataAfterSeekBecomesPlaying)
 				{
+                    bufferingProgress = 1;
 					[audioPlayer setInternalState:STKAudioPlayerInternalStatePlaying ifInState:^BOOL(STKAudioPlayerInternalState state)
 					{
 						return (state & STKAudioPlayerInternalStateRunning) && state != STKAudioPlayerInternalStatePaused;
@@ -3082,6 +3094,14 @@ static OSStatus OutputRenderCallback(void* inRefCon, AudioUnitRenderActionFlags*
 				audioPlayer->waitingForDataAfterSeekFrameCount = 0;
 			}
 		}
+    }
+    
+    if (audioPlayer->bufferingProgress != bufferingProgress) {
+        audioPlayer->bufferingProgress = bufferingProgress;
+        dispatch_async(dispatch_get_main_queue(), ^
+        {
+            [audioPlayer.delegate audioPlayer:audioPlayer didUpdateBufferingProgress:bufferingProgress];
+        });
     }
 
 	if (frameFilters)

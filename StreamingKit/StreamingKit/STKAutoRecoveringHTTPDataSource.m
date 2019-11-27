@@ -374,7 +374,11 @@ static void PopulateOptionsWithDefault(STKAutoRecoveringHTTPDataSourceOptions* o
     }
     else
     {
-        [self processRetryOnError];
+        if ([self length] > 0) {
+            [self processRetryOnError];
+        } else {
+            [super dataSourceErrorOccured:self];
+        }
     }
 }
 
