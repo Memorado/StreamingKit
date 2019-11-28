@@ -122,4 +122,8 @@
     [self.delegate dataSource:self didReadStreamMetadata:metadata];
 }
 
+- (void)dataSource:(nonnull STKDataSource *)dataSource waitingForNetwork:(BOOL)waitingForNetwork {
+    [self.delegate dataSource:self waitingForNetwork:waitingForNetwork];
+}
+
 @end

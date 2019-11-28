@@ -275,7 +275,7 @@ static void PopulateOptionsWithDefault(STKAutoRecoveringHTTPDataSourceOptions* o
 {
     if (waitingForNetwork)
     {
-        waitingForNetwork = NO;
+        [self setWaitingForNetwork:NO];
         
         NSLog(@"reachabilityChanged %lld/%lld", self.position, self.length);
         
@@ -297,6 +297,12 @@ static void PopulateOptionsWithDefault(STKAutoRecoveringHTTPDataSourceOptions* o
     ticksWhenLastDataReceived = GetTickCount();
     
     [super dataSourceDataAvailable:dataSource];
+}
+
+- (void)setWaitingForNetwork:(BOOL)value
+{
+    waitingForNetwork = value;
+    [self.delegate dataSource:self waitingForNetwork:waitingForNetwork];
 }
 
 -(void) attemptReconnectWithSerial:(NSNumber*)serialIn
@@ -323,12 +329,12 @@ static void PopulateOptionsWithDefault(STKAutoRecoveringHTTPDataSourceOptions* o
 {
     if (![self hasGotNetworkConnection])
     {
-        waitingForNetwork = YES;
+        [self setWaitingForNetwork:YES];
         
         return;
     }
     
-	waitingForNetwork = NO;
+    [self setWaitingForNetwork:NO];
 	
     NSRunLoop* runLoop = self.innerDataSource.eventsRunLoop;
     

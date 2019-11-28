@@ -141,6 +141,9 @@ typedef void(^STKFrameFilter)(UInt32 channelsPerFrame, UInt32 bytesPerFrame, UIn
 /// Raised when buffering progress has changed (after seeking or slower connections)
 -(void) audioPlayer:(STKAudioPlayer*)audioPlayer didUpdateBufferingProgress:(double)bufferingProgress;
 
+/// Raised when buffering is not happening due to missing network
+-(void) audioPlayer:(STKAudioPlayer*)audioPlayer didUpdateWaitingForNetwork:(double)waitingForNetwork;
+
 @end
 
 @interface STKAudioPlayer : NSObject<STKDataSourceDelegate>

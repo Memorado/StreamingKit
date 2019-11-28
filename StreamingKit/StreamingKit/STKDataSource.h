@@ -44,6 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) dataSourceErrorOccured:(STKDataSource*)dataSource;
 -(void) dataSourceEof:(STKDataSource*)dataSource;
 -(void) dataSource:(STKDataSource*)dataSource didReadStreamMetadata:(NSDictionary*)metadata;
+-(void) dataSource:(STKDataSource*)dataSource waitingForNetwork:(BOOL)waitingForNetwork;
 @end
 
 @interface STKDataSource : NSObject

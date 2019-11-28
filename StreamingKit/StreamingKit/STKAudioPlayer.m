@@ -1721,6 +1721,17 @@ static void AudioFileStreamPacketsProc(void* clientData, UInt32 numberBytes, UIn
         [self.delegate audioPlayer:self didReadStreamMetadata:metadata];
 }
 
+- (void)dataSource:(STKDataSource *)dataSource waitingForNetwork:(BOOL)waitingForNetwork
+{
+    if([self.delegate respondsToSelector:@selector(audioPlayer:didUpdateWaitingForNetwork:)])
+    {
+        dispatch_async(dispatch_get_main_queue(), ^
+        {
+            [self.delegate audioPlayer:self didUpdateWaitingForNetwork:waitingForNetwork];
+        });
+    }
+}
+
 -(void) pause
 {
     pthread_mutex_lock(&playerMutex);
