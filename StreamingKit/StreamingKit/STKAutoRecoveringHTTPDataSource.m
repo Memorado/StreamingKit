@@ -43,8 +43,8 @@
 #import <SystemConfiguration/SystemConfiguration.h>
 #import "STKAutoRecoveringHTTPDataSource.h"
 
-#define DEFAULT_WATCHDOG_PERIOD_SECONDS (8)
-#define DEFAULT_INACTIVE_PERIOD_BEFORE_RECONNECT_SECONDS (15)
+#define DEFAULT_WATCHDOG_PERIOD_SECONDS (5)
+#define DEFAULT_INACTIVE_PERIOD_BEFORE_RECONNECT_SECONDS (9)
 
 static uint64_t GetTickCount(void)
 {
